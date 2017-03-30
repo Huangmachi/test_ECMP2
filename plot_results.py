@@ -101,7 +101,7 @@ def get_throughput(throughput, traffic, app, input_file):
 
 	if app == 'NonBlocking':
 		switch = '1001'
-	elif app in ['BFlows', 'BFlows-A', 'ECMP', 'PureSDN', 'Hedera']:
+	elif app in ['BFlows', 'EFattree', 'ECMP', 'PureSDN', 'Hedera']:
 		switch = '3[0-9][0-9][0-9]'
 	else:
 		pass
@@ -216,8 +216,7 @@ def plot_results():
 	# _traffics = "stag1_0.5_0.3 stag2_0.5_0.3 stag1_0.6_0.2 stag2_0.6_0.2 stag1_0.7_0.2 stag2_0.7_0.2 stag1_0.8_0.1 stag2_0.8_0.1"
 	_traffics = "random stag_0.2_0.3 stag_0.3_0.3 stag_0.4_0.3 stag_0.5_0.3 stag_0.6_0.2 stag_0.7_0.2 stag_0.8_0.1"
 	traffics = _traffics.split(' ')
-	# apps = ['BFlows', 'BFlows-A', 'ECMP', 'PureSDN', 'Hedera']
-	apps = ['ECMP', 'PureSDN']
+	apps = ['ECMP', 'PureSDN', 'NonBlocking']
 	throughput = {}
 
 	for traffic in traffics:
@@ -225,7 +224,7 @@ def plot_results():
 			bwmng_file = args.out_dir + '/%s/%s/%s/bwmng.txt' % (args.flows_num_per_host, traffic, app)
 			throughput = get_throughput(throughput, traffic, app, bwmng_file)
 
-	# 1. Plot realtime bisection bandwidth.
+	# 1. Plot realtime throughput.
 	item = 'realtime_bisection_bw'
 	fig = plt.figure()
 	fig.set_size_inches(16, 20)
@@ -238,39 +237,43 @@ def plot_results():
 		plt.subplot(num_raw, num_column, NO_subplot)
 		y1 = get_value_list_1(throughput, traffic, item, 'ECMP')
 		y2 = get_value_list_1(throughput, traffic, item, 'PureSDN')
+		y3 = get_value_list_1(throughput, traffic, item, 'NonBlocking')
 		plt.plot(x, y1, 'b-', linewidth=2, label="ECMP")
 		plt.plot(x, y2, 'g-', linewidth=2, label="PureSDN")
+		plt.plot(x, y3, 'k-', linewidth=2, label="NonBlocking")
 		plt.title('%s' % traffic, fontsize='x-large')
 		plt.xlabel('Time (s)', fontsize='x-large')
 		plt.xlim(0, args.duration)
 		plt.xticks(np.arange(0, args.duration + 1, 10))
-		plt.ylabel('Realtime Bisection Bandwidth\n(Mbps)', fontsize='x-large')
+		plt.ylabel('Realtime Throughput\n(Mbps)', fontsize='x-large')
 		# plt.ylim(0, full_bisection_bw)
 		# plt.yticks(np.linspace(0, full_bisection_bw, 11))
 		plt.legend(loc='lower right', ncol=len(apps), fontsize='small')
 		plt.grid(True)
 		NO_subplot += 1
 	plt.subplots_adjust(top=0.95, bottom=0.05, left=0.1, right=0.95, hspace=0.25, wspace=0.35)
-	plt.savefig(args.out_dir + '/%s-1.realtime_bisection_bw.png' % args.flows_num_per_host)
+	plt.savefig(args.out_dir + '/%s-1.realtime_throughput.png' % args.flows_num_per_host)
 
-	# 2. Plot average bisection bandwidth.
+	# 2. Plot average throughput.
 	fig = plt.figure()
 	fig.set_size_inches(12, 6)
 	num_groups = len(traffics)
 	num_bar = len(apps)
 	ECMP_value_list = get_average_bisection_bw(throughput, traffics, 'ECMP')
 	PureSDN_value_list = get_average_bisection_bw(throughput, traffics, 'PureSDN')
+	NonBlocking_value_list = get_average_bisection_bw(throughput, traffics, 'NonBlocking')
 	index = np.arange(num_groups) + 0.15
 	bar_width = 0.15
-	plt.bar(index, PureSDN_value_list, bar_width, color='g', label='PureSDN')
-	plt.bar(index + 1 * bar_width, ECMP_value_list, bar_width, color='b', label='ECMP')
+	plt.bar(index, ECMP_value_list, bar_width, color='b', label='ECMP')
+	plt.bar(index + 1 * bar_width, PureSDN_value_list, bar_width, color='g', label='PureSDN')
+	plt.bar(index + 2 * bar_width, NonBlocking_value_list, bar_width, color='k', label='NonBlocking')
 	plt.xticks(index + num_bar / 2.0 * bar_width, traffics, fontsize='small')
-	plt.ylabel('Average Bisection Bandwidth\n(Mbps)', fontsize='x-large')
+	plt.ylabel('Average Throughput\n(Mbps)', fontsize='x-large')
 	# plt.ylim(0, full_bisection_bw)
 	# plt.yticks(np.linspace(0, full_bisection_bw, 11))
 	plt.legend(loc='lower right', ncol=len(apps), fontsize='small')
 	plt.grid(axis='y')
-	plt.savefig(args.out_dir + '/%s-2.average_bisection_bw.png' % args.flows_num_per_host)
+	plt.savefig(args.out_dir + '/%s-2.average_throughput.png' % args.flows_num_per_host)
 
 	# 3. Plot accumulated throughput.
 	item = 'accumulated_throughput'
@@ -285,8 +288,10 @@ def plot_results():
 		plt.subplot(num_raw, num_column, NO_subplot)
 		y1 = get_value_list_1(throughput, traffic, item, 'ECMP')
 		y2 = get_value_list_1(throughput, traffic, item, 'PureSDN')
+		y3 = get_value_list_1(throughput, traffic, item, 'NonBlocking')
 		plt.plot(x, y1, 'b-', linewidth=2, label="ECMP")
 		plt.plot(x, y2, 'g-', linewidth=2, label="PureSDN")
+		plt.plot(x, y3, 'k-', linewidth=2, label="NonBlocking")
 		plt.title('%s' % traffic, fontsize='x-large')
 		plt.xlabel('Time (s)', fontsize='x-large')
 		plt.xlim(0, args.duration)
@@ -308,10 +313,12 @@ def plot_results():
 	num_bar = len(apps)
 	ECMP_value_list = get_value_list_2(throughput, traffics, item, 'ECMP')
 	PureSDN_value_list = get_value_list_2(throughput, traffics, item, 'PureSDN')
+	NonBlocking_value_list = get_value_list_2(throughput, traffics, item, 'NonBlocking')
 	index = np.arange(num_groups) + 0.15
 	bar_width = 0.15
-	plt.bar(index, PureSDN_value_list, bar_width, color='g', label='PureSDN')
-	plt.bar(index + 1 * bar_width, ECMP_value_list, bar_width, color='b', label='ECMP')
+	plt.bar(index, ECMP_value_list, bar_width, color='b', label='ECMP')
+	plt.bar(index + 1 * bar_width, PureSDN_value_list, bar_width, color='g', label='PureSDN')
+	plt.bar(index + 2 * bar_width, ECMP_value_list, bar_width, color='k', label='NonBlocking')
 	plt.xticks(index + num_bar / 2.0 * bar_width, traffics, fontsize='small')
 	plt.ylabel('Normalized Total Throughput\n', fontsize='x-large')
 	plt.ylim(0, 1)

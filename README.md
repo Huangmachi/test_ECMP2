@@ -8,6 +8,7 @@ test_ECMP is a test experiment to compare the transmitting performance of ECMP a
 The following softwares should have been installed in your machine.
 * Mininet: git clone git://github.com/mininet/mininet; mininet/util/install.sh -a
 * Ryu: git clone git://github.com/osrg/ryu.git; cd ryu; pip install .
+* bwm-ng: apt-get install bwm-ng
 * Networkx: pip install networkx
 * Numpy: pip install numpy
 * Matplotlib: apt-get install python-matplotlib

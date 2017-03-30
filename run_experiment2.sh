@@ -51,6 +51,12 @@ do
 	mn -c
 	sudo python ./PureSDN/fattree.py --k $k --duration $duration --dir $dir --cpu $cpu
 
+	# NonBlocking
+	dir=$out_dir/$flowsPerHost/$traffic/NonBlocking
+	mkdir -p $dir
+	mn -c
+	sudo python ./NonBlocking/NonBlocking.py --k $k --duration $duration --dir $dir --cpu $cpu
+
 done
 
 

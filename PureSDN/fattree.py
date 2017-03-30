@@ -274,7 +274,7 @@ def traffic_generation(net, topo, flows_peers):
 		# filename = src[1:]
 		# client.cmd("iperf -c %s -t %d > %s/%s &" % (server.IP(), args.duration, args.output_dir, 'client'+filename+'.txt'))
 		client.cmd("iperf -c %s -t %d > /dev/null &" % (server.IP(), 1990))   # Its statistics is useless, just throw away. 1990 just means a great number.
-		time.sleep(2)
+		time.sleep(3)
 
 	# Wait for the traffic to become stable.
 	time.sleep(10)
